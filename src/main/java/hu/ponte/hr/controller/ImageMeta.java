@@ -25,6 +25,5 @@ public class ImageMeta {
 	@Lob
 	private String digitalSign;
 	@Lob
-	@Column(name = "imageData", length = 2000)
 	private byte[] imageData;
 }
