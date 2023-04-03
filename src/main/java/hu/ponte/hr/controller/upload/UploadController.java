@@ -3,6 +3,7 @@ package hu.ponte.hr.controller.upload;
 import hu.ponte.hr.services.ImageStore;
 import hu.ponte.hr.services.SignService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +24,6 @@ public class UploadController {
     public ResponseEntity<String> handleFormUpload(@RequestParam("file") MultipartFile file) throws Exception {
         String digitalSign = signService.createDigitalSignature(file);
         storeService.store(file, digitalSign);
-        return ResponseEntity.ok(digitalSign);
+        return new ResponseEntity<>(digitalSign, HttpStatus.CREATED);
     }
 }

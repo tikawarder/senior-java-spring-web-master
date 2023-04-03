@@ -3,24 +3,18 @@ package hu.ponte.hr.services;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.*;
-import java.security.cert.Certificate;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
 
 @Service
 public class SignService {
     private static final String CRYPT_ALGORITHM = "SHA256withRSA";
-    private static final String KEY_FORMAT = "PKCS8";
     private static final String PRIVATE_KEY_PATH = "src/main/resources/config/keys/key.private";
     private static final String PUBLIC_KEY_PATH = "src/main/resources/config/keys/key.pub";
-    private static final String RECEIVER = "receiver_key_pair";
-    private static final String SENDER = "sender_key_pair";
-    private static final char[] PASSWORD_FOR_KEYS = "password".toCharArray();
+    public static final String KEY_TYPE = "RSA";
 
     public String createDigitalSignature(MultipartFile file) throws Exception {
         Signature signature = Signature.getInstance(CRYPT_ALGORITHM);
@@ -38,17 +32,18 @@ public class SignService {
         return signature.verify(decodeSignature(digitalSignature));
     }
 
-    private static PrivateKey getPrivateKey() throws Exception {
-        KeyStore keyStore = KeyStore.getInstance(KEY_FORMAT);
-        keyStore.load(new FileInputStream(PRIVATE_KEY_PATH), PASSWORD_FOR_KEYS);
-        return (PrivateKey) keyStore.getKey(RECEIVER, PASSWORD_FOR_KEYS);
+    private PrivateKey getPrivateKey() throws Exception {
+        byte[] key = Files.readAllBytes(Paths.get(PRIVATE_KEY_PATH));
+        KeyFactory keyFactory = KeyFactory.getInstance(KEY_TYPE);
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(key);
+        return keyFactory.generatePrivate(keySpec);
     }
 
-    private static PublicKey getPublicKey() throws Exception {
-        KeyStore keyStore = KeyStore.getInstance(KEY_FORMAT);
-        keyStore.load(new FileInputStream(PUBLIC_KEY_PATH), PASSWORD_FOR_KEYS);
-        Certificate certificate = keyStore.getCertificate(SENDER);
-        return certificate.getPublicKey();
+    private PublicKey getPublicKey() throws Exception {
+        byte[] key = Files.readAllBytes(Paths.get(PUBLIC_KEY_PATH));
+        KeyFactory keyFactory = KeyFactory.getInstance(KEY_TYPE);
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(key);
+        return keyFactory.generatePublic(keySpec);
     }
 
     private String encodeSignature(byte[] digitalSignature){
