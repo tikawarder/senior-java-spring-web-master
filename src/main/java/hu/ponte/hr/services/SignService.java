@@ -52,10 +52,11 @@ public class SignService {
         return keyFactory.generatePublic(keySpec);
     }
 
-    private String encodeSignature(byte[] digitalSignature){
+    private String encodeSignature(byte[] digitalSignature) {
         log.info(ENCODING_MESSAGE);
         return Base64.getMimeEncoder().encodeToString(digitalSignature);
     }
+
     private byte[] decodeSignature(String encodedSignature) {
         log.info(DECODING_MESSAGE);
         return Base64.getMimeDecoder().decode(encodedSignature);
