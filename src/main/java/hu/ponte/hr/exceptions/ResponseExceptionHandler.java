@@ -9,12 +9,14 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.NoSuchElementException;
 
 @Slf4j
 @ControllerAdvice
 public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
     private static final String UNRESOLVED_ERROR = "Unresolved problem happened during encoding file or checking " +
             "private/public keys";
+    private static final String NO_ELEMENT_FOUND_ERROR = "Not found any element during search";
     @ExceptionHandler(FileSizeLimitException.class)
     public ResponseEntity<String> handleFileSizeLimitException(FileSizeLimitException exception) {
         log.warn(exception.getMessage());
@@ -22,14 +24,20 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(IOException.class)
-    public ResponseEntity<String> handleIOErrors(IOException exception) {
+    public ResponseEntity<String> handleIOException(IOException exception) {
         log.error(exception.getMessage());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler({NoSuchAlgorithmException.class, InvalidKeySpecException.class})
-    public ResponseEntity<String> handleEncryptErrors(Exception exception) {
+    public ResponseEntity<String> handleEncryptException(Exception exception) {
         log.error(UNRESOLVED_ERROR);
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<String> handleNoSuchElementException(Exception exception) {
+        log.warn(NO_ELEMENT_FOUND_ERROR);
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 }
