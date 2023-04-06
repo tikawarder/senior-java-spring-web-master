@@ -5,21 +5,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
 @DataJpaTest
 class ImageRepositoryTest {
+    public static final String ID = "1";
     private ImageMeta testImage;
     @Autowired
     private ImageRepository repository;
-    @Autowired
-    private TestEntityManager testEntityManager;
     @BeforeEach
     public void setup(){
         testImage = ImageMeta.builder()
-                .id("1")
+                .id(ID)
                 .digitalSign("signed")
                 .name("test_name")
                 .build();
@@ -37,7 +35,7 @@ class ImageRepositoryTest {
         //given
         ImageMeta storeImage = repository.save(testImage);
         //when
-        ImageMeta imageDao = repository.findById("1").get();
+        ImageMeta imageDao = repository.findById(ID).get();
         //then
         then(imageDao.getDigitalSign()).isEqualTo(storeImage.getDigitalSign());
     }
